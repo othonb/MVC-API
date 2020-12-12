@@ -16,6 +16,8 @@ namespace Commander.Data
 
     void UpdateCommand(Command cmd);
 
+    void DeleteCommand(int id);
+
   }
 
 }

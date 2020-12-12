@@ -20,6 +20,9 @@ namespace Commander.Profiles
         // A CommandUpdateDto is read and a Command is obtained
         CreateMap<CommandUpdateDto, Command>();
 
+        // A Command is read and a CommandUpdateDto is obtained
+        CreateMap<Command, CommandUpdateDto>();
+
     }
 
   }

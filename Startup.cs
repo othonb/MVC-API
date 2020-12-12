@@ -14,6 +14,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Newtonsoft.Json.Serialization;
 
 namespace Commander
 {
@@ -45,7 +47,9 @@ namespace Commander
                 AddScoped -> created once per client request
                 Transient -> new instance created every time
             */
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(s => {
+                s.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
 
             // Use automapper via dependency injection
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

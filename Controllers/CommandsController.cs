@@ -4,6 +4,7 @@ using AutoMapper;
 using Commander.Data;
 using Commander.Dtos;
 using Commander.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Commander.Controllers
@@ -149,6 +150,86 @@ namespace Commander.Controllers
           message = "Não foi possível atualizar o registro, pois ele não existe!",
           status = false
         });
+      }
+    }
+
+    // PATCH api/commands/{id}
+    [HttpPatch("{id}")]
+    public ActionResult PartialCommandUpdate(int id, JsonPatchDocument<CommandUpdateDto> patchDoc)
+    {
+
+      var commandModelFromRepo = _repository.GetCommandById(id);
+
+      var oldCommandModelFromRepo = commandModelFromRepo.Clone();
+
+      if (commandModelFromRepo != null) {
+
+        var commandToPatch = _mapper.Map<CommandUpdateDto>(commandModelFromRepo);
+
+        patchDoc.ApplyTo(commandToPatch, ModelState);
+
+        if (TryValidateModel(commandToPatch)) {
+
+          _mapper.Map(commandToPatch, commandModelFromRepo);
+
+          _repository.UpdateCommand(commandModelFromRepo);
+
+        if (_repository.SaveChanges()) {
+
+          return Ok(new {
+            oldValue = oldCommandModelFromRepo,
+            newValue = commandModelFromRepo,
+            status = true
+          });
+        } else {
+
+          return NotFound(new {
+            message = "Não foi possível salvar o registro!",
+            status = false
+          });
+
+        }
+
+
+        } else {
+
+          return ValidationProblem(ModelState);
+        }
+
+
+      } else {
+
+        return NotFound(new {
+          message = "Não foi possível atualizar o registro, pois ele não existe!",
+          status = false
+        });
+
+      }
+
+    }
+
+    // DELETE api/command{id}
+    [HttpDelete("{id}")]
+    public ActionResult DeleteCommand(int id)
+    {
+
+      var oldCommandModelFromRepo = _repository.GetCommandById(id).Clone();
+
+      _repository.DeleteCommand(id);
+
+      if (_repository.SaveChanges()) {
+
+        return Ok(new {
+            oldValue = oldCommandModelFromRepo,
+            status = true
+          });
+      } else {
+
+          return NotFound(new {
+            message = "Não foi possível remover o registro!",
+            status = false
+          });
+
       }
     }
 
